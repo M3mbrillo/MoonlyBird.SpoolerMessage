@@ -1,6 +1,5 @@
 
 using MoonlyBird.SpoolerMessage.Server.ConfigureService;
-using Serilog;
 
 
 namespace MoonlyBird.SpoolerMessage.Server
@@ -10,7 +9,7 @@ namespace MoonlyBird.SpoolerMessage.Server
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            
+
 
             //builder.ImplementSerilog();
 
@@ -22,7 +21,7 @@ namespace MoonlyBird.SpoolerMessage.Server
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            builder.Services.ConfigureMassTransitServices();                        
+            builder.Services.ConfigureMassTransitServices();
 
 
             var app = builder.Build();

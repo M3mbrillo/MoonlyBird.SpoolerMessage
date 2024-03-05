@@ -1,7 +1,5 @@
-﻿using Apache.NMS.ActiveMQ.Commands;
-using MassTransit;
+﻿using MassTransit;
 using MoonlyBird.SpoolerMessage.Server.Consumers;
-using System.Runtime.CompilerServices;
 
 namespace MoonlyBird.SpoolerMessage.Server.ConfigureService
 {
@@ -16,7 +14,6 @@ namespace MoonlyBird.SpoolerMessage.Server.ConfigureService
 
                 busRegistration.UsingActiveMq((busContext, factoryConfiguration) =>
                 {
-
                     factoryConfiguration.Host("activemq://localhost:61616/", configureHost =>
                     {
                         configureHost.Username("artemis");
@@ -24,7 +21,6 @@ namespace MoonlyBird.SpoolerMessage.Server.ConfigureService
                     });
 
                     factoryConfiguration.ConfigureEndpoints(busContext);
-
                 });
 
             });
