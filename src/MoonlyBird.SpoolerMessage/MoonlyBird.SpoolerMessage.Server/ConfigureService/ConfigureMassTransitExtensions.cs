@@ -1,5 +1,7 @@
 ﻿using MassTransit;
+using MassTransit.KafkaIntegration;
 using MoonlyBird.SpoolerMessage.Server.Consumers;
+using MoonlyBird.SpoolerMessage.Server.Models;
 
 namespace MoonlyBird.SpoolerMessage.Server.ConfigureService
 {
@@ -7,9 +9,8 @@ namespace MoonlyBird.SpoolerMessage.Server.ConfigureService
     {
         public static void ConfigureMassTransitServices(this IServiceCollection services)
         {
-            services.AddMassTransit(busRegistration =>
+            services.AddMassTransit<IActiveMqBus>(busRegistration =>
             {
-
                 busRegistration.AddConsumer<PrintLabelConsumer, PrintLabelConsumerDefinition>();
 
                 busRegistration.UsingActiveMq((busContext, factoryConfiguration) =>
@@ -24,6 +25,26 @@ namespace MoonlyBird.SpoolerMessage.Server.ConfigureService
                 });
 
             });
+
+
+            services.AddMassTransit<IKafkaBus>(busRegistration =>
+            {
+                busRegistration.UsingInMemory();
+
+                busRegistration.AddRider((rider) =>
+                {
+                    rider.AddProducer<PrintedLabelAlertDto>("printed-label-alert");
+
+                    rider.UsingKafka((registrationContext, kafkaFactoryConfigurator) =>
+                    {
+                        kafkaFactoryConfigurator.Host("localhost:9094");
+                    });
+                });
+            });
         }
     }
+    
+    public interface IKafkaBus : IBus { }
+
+    public interface IActiveMqBus : IBus { }
 }

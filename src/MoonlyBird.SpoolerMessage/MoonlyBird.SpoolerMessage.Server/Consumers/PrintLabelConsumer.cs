@@ -1,21 +1,29 @@
 ﻿using MassTransit;
+using MassTransit.DependencyInjection;
+using MassTransit.KafkaIntegration;
+using MoonlyBird.SpoolerMessage.Server.ConfigureService;
 using MoonlyBird.SpoolerMessage.Server.Models;
 
 namespace MoonlyBird.SpoolerMessage.Server.Consumers
 {
-    public class PrintLabelConsumer : MassTransit.IConsumer<PrintLabelDto>
+    public class PrintLabelConsumer(
+        ILogger<PrintLabelConsumer> logger,
+        ITopicProducer<PrintedLabelAlertDto> producer
+        ) : MassTransit.IConsumer<PrintLabelDto>
     {
-
-        public PrintLabelConsumer(ILogger<PrintLabelConsumer> logger)
-        {
-            Logger = logger;
-        }
-
-        public ILogger<PrintLabelConsumer> Logger { get; }
+        private readonly ITopicProducer<PrintedLabelAlertDto> Producer = producer;
+        private ILogger<PrintLabelConsumer> Logger { get; } = logger;
 
         public async Task Consume(ConsumeContext<PrintLabelDto> context)
         {
-            Logger.LogInformation(context.Message.Label);
+            Logger.LogInformation("Label: {?}", context.Message.Label);
+            await Task.Delay(1000, context.CancellationToken);
+
+            await Producer.Produce(new
+            {
+                MessageId = 1,
+                IsPrinted = true
+            });
         }
     }
 
@@ -25,9 +33,10 @@ namespace MoonlyBird.SpoolerMessage.Server.Consumers
     {
         protected override void ConfigureConsumer(
             IReceiveEndpointConfigurator endpointConfigurator,
-            IConsumerConfigurator<PrintLabelConsumer> consumerConfigurator
+            IConsumerConfigurator<PrintLabelConsumer> consumerConfigurator,
+            IRegistrationContext registrationContext
         )
-        {
+        {           
             endpointConfigurator.ConfigureConsumeTopology = false;
             endpointConfigurator.ClearSerialization();
 
